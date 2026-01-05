@@ -1,0 +1,3 @@
+import type { NextFunction, Request, Response } from "express";
+export declare function teacherOnly(req: Request, res: Response, next: NextFunction): Promise<Response<any, Record<string, any>> | undefined>;
+//# sourceMappingURL=teacherOnly.d.ts.map
