@@ -1,7 +1,7 @@
 import express from "express";
 import { teacherOnly } from "../middleware/teacherOnly.js";
 import { addStudentSchema, classSchema } from "../types/classTypes.js";
-import { classModel, userModel } from "../db/db.js";
+import { AttendanceModel, classModel, userModel } from "../db/db.js";
 import mongoose from "mongoose";
 import { auth } from "../middleware/auth.js";
 import { id } from "zod/locales";
@@ -45,9 +45,10 @@ classRouter.post('/:id/add-student', teacherOnly, async (req, res) => {
         });
     }
     const { studentId } = data;
-    const findClass = await classModel.findOne({
+    const findClass = await classModel.findById({
         _id: req.params.id
     });
+    console.log(findClass);
     if (!findClass) {
         return res.status(401).json({
             "success": false,
@@ -71,6 +72,14 @@ classRouter.post('/:id/add-student', teacherOnly, async (req, res) => {
     }
     findClass.studentIds.push(new mongoose.Types.ObjectId(studentId));
     await findClass.save();
+    const saveAttendance = await AttendanceModel.create({
+        status: "present",
+        studentId: studentId,
+        classId: findClass._id
+    });
+    if (!saveAttendance) {
+        return res.status(400).json("attendance not saved");
+    }
     return res.status(200).json({
         "success": true,
         "data": {
@@ -111,7 +120,7 @@ classRouter.get('/classRoom/:id', auth, async (req, res) => {
 });
 classRouter.get('/students', teacherOnly, async (req, res) => {
     const isClassHostTeacher = await classModel
-        .findOne({ teacherIds: new mongoose.Types.ObjectId(req.id) })
+        .findOne({ teacherId: new mongoose.Types.ObjectId(req.id) })
         .select("studentIds")
         .populate("studentIds", "name email");
     if (!isClassHostTeacher) {
@@ -126,27 +135,27 @@ classRouter.get('/students', teacherOnly, async (req, res) => {
     });
 });
 classRouter.get('/:id/my-attendance', auth, async (req, res) => {
+    if (req.role === "teacher") {
+        return res.status(401).json("Cannot be accessed");
+    }
     const studentId = req.id;
     if (!studentId) {
         return res.status(404).json("student not found");
     }
-    const findClass = await classModel.findOne({ _id: req.params.id }).select('studentIds');
-    if (!findClass) {
+    const findClass = await AttendanceModel.find({
+        classId: new mongoose.Types.ObjectId(req.params.id),
+        studentId: studentId
+    })
+        .select("classId status");
+    if (findClass.length < 1) {
         return res.status(404).json({
             "success": false,
-            "json": "Cannot found the class"
+            "json": "Student not found in the class"
         });
     }
-    return res.status(200).json({
+    return res.status(201).json({
         "success": true,
         "json": findClass
     });
-    // const checkIfStudentIsEnrolledInClass = findClass
-    //   if (!checkIfStudentIsEnrolledInClass) {
-    //     return res.status(404).json({
-    //         "success": false,
-    //         "json": "you are enrolled in class"
-    //     })
-    // }
 });
 //# sourceMappingURL=classRoute.js.map
