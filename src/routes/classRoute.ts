@@ -1,11 +1,14 @@
 import express from "express";
 import { teacherOnly } from "../middleware/teacherOnly.js";
-import { addStudentSchema, classSchema } from "../types/classTypes.js";
+import { addStudentSchema, attendanceStartSchema, classSchema } from "../types/classTypes.js";
 import { AttendanceModel, classModel, userModel } from "../db/db.js";
 import mongoose from "mongoose";
 import { auth } from "../middleware/auth.js";
-import { id } from "zod/locales";
-import type { _discriminatedUnion } from "zod/v4/core";
+
+let activeSession: {  
+  classId: string
+  startedAt: Date,
+  attendance: Record<string, string>} | null = null;
 
 export const classRouter = express.Router();
 
@@ -149,23 +152,17 @@ classRouter.get('/classRoom/:id', auth, async (req, res) => {
 
 classRouter.get('/students', teacherOnly, async (req, res) => {
 
-    const isClassHostTeacher = await classModel
-        .findOne({ teacherId: new mongoose.Types.ObjectId(req.id) })
-        .select("studentIds")
-        .populate("studentIds", "name email")
+    const students = await userModel.find({role: "student"});
 
-    if (!isClassHostTeacher) {
-        return res.status(404).json({
-            "success": false,
-            "error": "you have not a class member"
-        })
-    }
-    return res.status(200).json({
+    return res.status(201).json({
         "success": true,
-        "data": isClassHostTeacher
+        "data": students.map(student => ({
+            id: student._id,
+            name: student.name,
+            email: student.email
+        }))
     })
 })
-
 
 classRouter.get('/:id/my-attendance', auth, async (req, res) => {
 
@@ -188,13 +185,48 @@ classRouter.get('/:id/my-attendance', auth, async (req, res) => {
     if(findClass.length < 1){
         return res.status(404).json({
             "success": false,
-            "json": "Student not found in the class"
+            "data": "Student not found in the class"
         }) 
     }
 
     return res.status(201).json({
             "success": true,
-            "json": findClass
+            "data": findClass
         }) 
 })
 
+classRouter.post('/attendance/start', teacherOnly,  async(req, res) => {
+    const {data, success} = attendanceStartSchema.safeParse(req.body);
+
+    if (!success) {
+        return res.status(400).json({
+            success: false,
+            error: "Invalid data"
+        });
+    }
+
+    const {classId} = data;
+
+    const findClass = await classModel.findById({ _id: classId});
+
+    if(!findClass || findClass.teacherId?.toString() !== req.id){
+        return res.status(401).json({
+            "success": false,
+            "error": "Cannot found a class"
+        })
+    }
+
+    activeSession = {
+        classId: findClass._id.toString(),
+        startedAt: new Date(),
+        attendance: {}
+    }
+
+    return res.status(201).json({
+       "success": true,
+       "data": {
+            "classId": classId,
+            "startedAt": activeSession.startedAt
+        }
+    })
+})
