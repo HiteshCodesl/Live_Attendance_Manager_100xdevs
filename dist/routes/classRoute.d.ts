@@ -1,2 +1,2 @@
-export declare const classRouter: import("express-serve-static-core").Router;
+export declare const classRouter: import("express-ws").Router;
 //# sourceMappingURL=classRoute.d.ts.map

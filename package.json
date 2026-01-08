@@ -21,9 +21,15 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-ws": "^5.0.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.0",
     "typescript": "^5.9.3",
+    "ws": "^8.19.0",
     "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/express-ws": "^3.0.6",
+    "@types/ws": "^8.18.1"
   }
 }

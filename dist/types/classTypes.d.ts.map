@@ -1,1 +1,1 @@
-{"version":3,"file":"classTypes.d.ts","sourceRoot":"","sources":["../../src/types/classTypes.ts"],"names":[],"mappings":"AAAA,OAAO,CAAC,MAAM,KAAK,CAAA;AAEnB,eAAO,MAAM,WAAW;;mBAEtB,CAAA;AAEF,eAAO,MAAM,gBAAgB;;mBAE3B,CAAA"}
+{"version":3,"file":"classTypes.d.ts","sourceRoot":"","sources":["../../src/types/classTypes.ts"],"names":[],"mappings":"AAAA,OAAO,CAAC,MAAM,KAAK,CAAA;AAEnB,eAAO,MAAM,WAAW;;mBAEtB,CAAA;AAEF,eAAO,MAAM,gBAAgB;;mBAE3B,CAAA;AAEF,eAAO,MAAM,qBAAqB;;mBAEhC,CAAA"}
