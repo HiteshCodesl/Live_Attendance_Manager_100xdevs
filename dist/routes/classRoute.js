@@ -1,10 +1,10 @@
 import express from "express";
 import { teacherOnly } from "../middleware/teacherOnly.js";
-import { addStudentSchema, attendanceStartSchema, classSchema } from "../types/classTypes.js";
+import { addStudentSchema, attendanceStartSchema, classSchema } from "../utils/classTypes.js";
 import { AttendanceModel, classModel, userModel } from "../db/db.js";
 import mongoose from "mongoose";
 import { auth } from "../middleware/auth.js";
-let activeSession = null;
+export let activeSession = null;
 export const classRouter = express.Router();
 classRouter.post('/create', teacherOnly, async (req, res) => {
     const teacherId = req.id;

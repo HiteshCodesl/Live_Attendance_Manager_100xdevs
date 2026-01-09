@@ -3,18 +3,20 @@ import jwt, {} from "jsonwebtoken";
 const allWebSocketConnections = [];
 export function webSocketServer(wsserver) {
     wsserver.ws('/ws', (ws, req) => {
+        const socket = ws;
         const token = req.query.token;
         if (!token) {
             ws.close();
             return;
         }
         const { id, role } = jwt.verify(token, process.env.JWT_SECRET);
+        socket.user = { userId: id, role };
         allWebSocketConnections.push({ ws, userId: id, role });
-        ws.on('message', (data) => {
-            ws.send(data.toString());
-            console.log(id, role);
-            console.log(data.toString());
-        });
+        console.log("socket", socket);
+        console.log("ws", ws);
+        // ws.on('message', (data) => {
+        //     if(socket)  
+        // })
         ws.on('close', () => {
             allWebSocketConnections.filter(x => x.ws !== ws);
         });

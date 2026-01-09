@@ -1,14 +1,16 @@
 import express from "express";
 import { teacherOnly } from "../middleware/teacherOnly.js";
-import { addStudentSchema, attendanceStartSchema, classSchema } from "../types/classTypes.js";
+import { addStudentSchema, attendanceStartSchema, classSchema } from "../utils/classTypes.js";
 import { AttendanceModel, classModel, userModel } from "../db/db.js";
 import mongoose from "mongoose";
 import { auth } from "../middleware/auth.js";
 
-let activeSession: {  
+export let activeSession: {  
   classId: string
   startedAt: Date,
-  attendance: Record<string, string>} | null = null;
+  attendance: Record<string, string>,
+  teacherId: string
+}; 
 
 export const classRouter = express.Router();
 
@@ -219,7 +221,8 @@ classRouter.post('/attendance/start', teacherOnly,  async(req, res) => {
     activeSession = {
         classId: findClass._id.toString(),
         startedAt: new Date(),
-        attendance: {}
+        attendance: {},
+        teacherId: req.id
     }
 
     return res.status(201).json({

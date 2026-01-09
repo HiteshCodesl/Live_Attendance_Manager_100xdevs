@@ -6,7 +6,6 @@ import {classRouter} from "./routes/classRoute.js"
 import expressWs from "express-ws";
 import { webSocketServer } from "./socket/ws.js";
 
-
 const app = express();
 
 const wsInstance = expressWs(app);
@@ -17,10 +16,10 @@ app.use(cors());
 
 webSocketServer(wsServer); 
  
-
 connectToDatabase();
 
 app.use('/user', userRouter);
 app.use('/class', classRouter);
+
 
 app.listen(3000, () => console.log("app is listning on port 3000"));

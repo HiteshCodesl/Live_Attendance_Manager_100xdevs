@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginSchema, signupSchema } from "../types/userTypes.js";
+import { loginSchema, signupSchema } from "../utils/userTypes.js";
 import { userModel } from "../db/db.js";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
