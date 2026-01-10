@@ -4,7 +4,7 @@ import { addStudentSchema, attendanceStartSchema, classSchema } from "../utils/c
 import { AttendanceModel, classModel, userModel } from "../db/db.js";
 import mongoose from "mongoose";
 import { auth } from "../middleware/auth.js";
-export let activeSession = null;
+export let activeSession;
 export const classRouter = express.Router();
 classRouter.post('/create', teacherOnly, async (req, res) => {
     const teacherId = req.id;
@@ -72,14 +72,6 @@ classRouter.post('/:id/add-student', teacherOnly, async (req, res) => {
     }
     findClass.studentIds.push(new mongoose.Types.ObjectId(studentId));
     await findClass.save();
-    const saveAttendance = await AttendanceModel.create({
-        status: "present",
-        studentId: studentId,
-        classId: findClass._id
-    });
-    if (!saveAttendance) {
-        return res.status(400).json("attendance not saved");
-    }
     return res.status(200).json({
         "success": true,
         "data": {
@@ -172,7 +164,8 @@ classRouter.post('/attendance/start', teacherOnly, async (req, res) => {
     activeSession = {
         classId: findClass._id.toString(),
         startedAt: new Date(),
-        attendance: {}
+        attendance: {},
+        teacherId: req.id
     };
     return res.status(201).json({
         "success": true,
