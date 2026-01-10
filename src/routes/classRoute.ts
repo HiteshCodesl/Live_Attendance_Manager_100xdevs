@@ -8,7 +8,7 @@ import { auth } from "../middleware/auth.js";
 export let activeSession: {  
   classId: string
   startedAt: Date,
-  attendance: Record<string, string>,
+  attendance: Record<string, "present" | "absent">, //  Record<string = studentId, string = presnt | absent>
   teacherId: string
 }; 
 
@@ -98,16 +98,6 @@ classRouter.post('/:id/add-student', teacherOnly, async (req, res) => {
 
     findClass.studentIds.push(new mongoose.Types.ObjectId(studentId));
     await findClass.save();
-
-    const saveAttendance = await AttendanceModel.create({
-        status: "present",
-        studentId: studentId,
-        classId: findClass._id
-    })
-
-    if(!saveAttendance){
-        return res.status(400).json("attendance not saved");
-    }
 
     return res.status(200).json({
         "success": true,
@@ -223,7 +213,7 @@ classRouter.post('/attendance/start', teacherOnly,  async(req, res) => {
         startedAt: new Date(),
         attendance: {},
         teacherId: req.id
-    }
+    }   
 
     return res.status(201).json({
        "success": true,
